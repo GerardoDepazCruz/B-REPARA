@@ -4,12 +4,12 @@
 
 Para compilar y descargar dependencias
 ```
-bash.\mvnw.cmd clean install -DskipTests
+.\mvnw.cmd clean install -DskipTests
 ```
 
 Para levantar el servidor
 ```
-bash.\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 ## **Tecnologías**
