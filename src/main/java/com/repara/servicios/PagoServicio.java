@@ -76,17 +76,22 @@ public class PagoServicio {
         SolicitudServicio solicitud = solicitudRepositorio.findById(idSolicitud)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Solicitud no encontrada"));
 
-        if (solicitud.getCostoFinal() == null) {
-            throw new ReglaNegocioException("La solicitud no tiene costo final definido");
+        // 🔥 Usamos el monto enviado desde el frontend o el costo_final de la solicitud
+        BigDecimal montoFinal = peticion.getMonto() != null 
+                ? peticion.getMonto() 
+                : solicitud.getCostoFinal();
+
+        if (montoFinal == null) {
+            throw new ReglaNegocioException("El monto final es requerido");
         }
 
         PagoMetodo metodo = metodoRepositorio.findById(peticion.getIdMetodoPago())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Método de pago no encontrado"));
 
-        BigDecimal montoFinal = solicitud.getCostoFinal().subtract(
+        BigDecimal montoACobrar = montoFinal.subtract(
                 solicitud.getMontoInicial() != null ? solicitud.getMontoInicial() : BigDecimal.ZERO);
         
-        BigDecimal comision = montoFinal.multiply(metodo.getComisionPorcentaje())
+        BigDecimal comision = montoACobrar.multiply(metodo.getComisionPorcentaje())
                 .divide(new BigDecimal("100"));
 
         Pago pago = Pago.builder()
@@ -94,10 +99,10 @@ public class PagoServicio {
                 .metodoPago(metodo)
                 .tipoPago(Pago.TipoPago.COMPLEMENTARIO)
                 .descripcion("Pago final del servicio")
-                .monto(montoFinal)
+                .monto(montoACobrar)
                 .porcentajeComision(metodo.getComisionPorcentaje())
                 .montoComision(comision)
-                .montoNetoTecnico(montoFinal.subtract(comision))
+                .montoNetoTecnico(montoACobrar.subtract(comision))
                 .estado(Pago.Estado.PAGADO)
                 .referenciaTransaccion(UUID.randomUUID().toString())
                 .numeroOperacion(peticion.getNumeroOperacion())
@@ -106,10 +111,10 @@ public class PagoServicio {
 
         pagoRepositorio.save(pago);
 
-        // Actualizar solicitud
-        solicitud.setMontoFinal(solicitud.getCostoFinal());
-        solicitud.setEstado(SolicitudServicio.Estado.COMPLETADO);
-        solicitud.setFechaFinalizacion(LocalDateTime.now());
+        // 🔥 Actualizar solicitud a REPARACION_EN_PROCESO
+        solicitud.setCostoFinal(montoFinal);
+        solicitud.setMontoFinal(montoFinal);
+        solicitud.setEstado(SolicitudServicio.Estado.REPARACION_EN_PROCESO);
         solicitudRepositorio.save(solicitud);
 
         return pago;

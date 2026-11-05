@@ -17,7 +17,7 @@ public class NotificacionDestinatario {
 
     @Id
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER) //
     @JoinColumn(name = "id_notificacion")
     private Notificacion notificacion;
 

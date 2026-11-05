@@ -1,6 +1,8 @@
 package com.repara.repositorios;
 
 import com.repara.entidades.PostulacionTecnico;
+
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface PostulacionTecnicoRepositorio extends JpaRepository<PostulacionTecnico, Long> {
     
+    @EntityGraph(attributePaths = {"usuario"})
     List<PostulacionTecnico> findByEstado(PostulacionTecnico.Estado estado);
     
     List<PostulacionTecnico> findByUsuarioIdUsuario(Long idUsuario);

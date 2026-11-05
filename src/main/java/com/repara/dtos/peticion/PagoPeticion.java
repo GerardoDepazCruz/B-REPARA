@@ -1,5 +1,7 @@
 package com.repara.dtos.peticion;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -12,4 +14,6 @@ public class PagoPeticion {
     private String referenciaTransaccion;
     
     private String numeroOperacion;
+
+    private BigDecimal monto;
 }

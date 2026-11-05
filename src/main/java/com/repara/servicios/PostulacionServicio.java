@@ -1,12 +1,15 @@
 package com.repara.servicios;
 
 import com.repara.dtos.peticion.PostulacionPeticion;
+import com.repara.dtos.respuesta.PostulacionRespuesta;
 import com.repara.entidades.PostulacionTecnico;
+import com.repara.entidades.SolicitudServicio;
 import com.repara.entidades.Tecnico;
 import com.repara.entidades.Usuario;
 import com.repara.excepciones.ReglaNegocioException;
 import com.repara.excepciones.RecursoNoEncontradoException;
 import com.repara.repositorios.PostulacionTecnicoRepositorio;
+import com.repara.repositorios.SolicitudServicioRepositorio;
 import com.repara.repositorios.TecnicoRepositorio;
 import com.repara.repositorios.UsuarioRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ public class PostulacionServicio {
 
     @Autowired
     private PostulacionTecnicoRepositorio postulacionRepositorio;
+
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
@@ -57,6 +61,7 @@ public class PostulacionServicio {
 
         return postulacionRepositorio.save(postulacion);
     }
+
 
     public List<PostulacionTecnico> listarPendientes() {
         return postulacionRepositorio.findByEstado(PostulacionTecnico.Estado.PENDIENTE);
@@ -123,4 +128,35 @@ public class PostulacionServicio {
     public List<PostulacionTecnico> listarPorUsuario(Long idUsuario) {
         return postulacionRepositorio.findByUsuarioIdUsuario(idUsuario);
     }
+
+        public List<PostulacionRespuesta> listarPendientesDTO() {
+        List<PostulacionTecnico> pendientes = postulacionRepositorio.findByEstado(PostulacionTecnico.Estado.PENDIENTE);
+        
+        return pendientes.stream().map(p -> {
+            PostulacionRespuesta dto = new PostulacionRespuesta();
+            dto.setIdPostulacion(p.getIdPostulacion());
+            
+            // Datos del usuario
+            if (p.getUsuario() != null) {
+                dto.setNombres(p.getUsuario().getNombres());
+                dto.setApellidos(p.getUsuario().getApellidos());
+                dto.setCorreo(p.getUsuario().getCorreo());
+                dto.setTelefono(p.getUsuario().getTelefono());
+                dto.setDni(p.getUsuario().getDni());
+            }
+            
+            // Datos de la postulación
+            dto.setEspecialidadDeclarada(p.getEspecialidadDeclarada());
+            dto.setAniosExperiencia(p.getAniosExperiencia());
+            dto.setCvUrl(p.getCvUrl());
+            dto.setCertificadosUrl(p.getCertificadosUrl());
+            dto.setDniDocumentoUrl(p.getDniDocumentoUrl());
+            dto.setEstado(p.getEstado().name());
+            dto.setFechaPostulacion(p.getFechaPostulacion());
+            
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
+    
 }

@@ -2,11 +2,15 @@ package com.repara.controladores;
 
 import com.repara.dtos.peticion.SolicitudPeticion;
 import com.repara.dtos.respuesta.ApiRespuesta;
+import com.repara.entidades.Calificacion;
+import com.repara.entidades.CertificadoGarantia;
 import com.repara.entidades.SolicitudServicio;
 import com.repara.entidades.Tecnico;
 import com.repara.entidades.Usuario;
 import com.repara.excepciones.RecursoNoEncontradoException;
 import com.repara.repositorios.TecnicoRepositorio;
+import com.repara.servicios.CalificacionServicio;
+import com.repara.servicios.CertificadoServicio;
 import com.repara.servicios.SolicitudServicioService;
 import com.repara.servicios.UsuarioServicio;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +30,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class SolicitudControlador {
 
+
+    
     @Autowired
     private SolicitudServicioService solicitudServicio;
 
@@ -44,6 +50,12 @@ public class SolicitudControlador {
         SolicitudServicio solicitud = solicitudServicio.crear(cliente.getIdUsuario(), peticion);
         return ResponseEntity.ok(ApiRespuesta.exitoso("Solicitud creada", solicitud));
     }
+
+    @GetMapping("/{id}")
+public ResponseEntity<ApiRespuesta<SolicitudServicio>> obtenerPorId(@PathVariable Long id) {
+    SolicitudServicio solicitud = solicitudServicio.obtenerPorId(id);
+    return ResponseEntity.ok(ApiRespuesta.exitoso(solicitud));
+}
 
     @GetMapping("/mis-solicitudes")
     @Operation(summary = "Cliente: mis solicitudes")
@@ -83,5 +95,29 @@ public class SolicitudControlador {
         SolicitudServicio solicitud = solicitudServicio.cambiarEstado(
                 id, nuevoEstado, usuario.getIdUsuario(), comentario);
         return ResponseEntity.ok(ApiRespuesta.exitoso("Estado actualizado", solicitud));
+    }
+
+        @Autowired
+    private CalificacionServicio calificacionServicio;
+
+    @PostMapping("/{id}/calificar")
+    public ResponseEntity<ApiRespuesta<Calificacion>> calificar(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body,
+            Authentication auth) {
+        Usuario usuario = usuarioServicio.obtenerPorCorreo(auth.getName());
+        Integer puntuacion = (Integer) body.get("puntuacion");
+        String comentario = (String) body.getOrDefault("comentario", "");
+        
+        Calificacion calificacion = calificacionServicio.calificar(id, usuario.getIdUsuario(), puntuacion, comentario);
+        return ResponseEntity.ok(ApiRespuesta.exitoso("Calificación guardada", calificacion));
+    }
+        @Autowired
+    private CertificadoServicio certificadoServicio;
+
+    @GetMapping("/{id}/certificado")
+    public ResponseEntity<ApiRespuesta<CertificadoGarantia>> obtenerCertificado(@PathVariable Long id) {
+        CertificadoGarantia certificado = certificadoServicio.generarCertificado(id);
+        return ResponseEntity.ok(ApiRespuesta.exitoso(certificado));
     }
 }

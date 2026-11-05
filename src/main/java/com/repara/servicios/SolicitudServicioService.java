@@ -56,6 +56,11 @@ public class SolicitudServicioService {
         return solicitud;
     }
 
+    public SolicitudServicio obtenerPorId(Long id) {
+    return solicitudRepositorio.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Solicitud no encontrada"));
+}
+
     public List<SolicitudServicio> listarPorCliente(Long idCliente) {
         return solicitudRepositorio.findByClienteIdUsuarioOrderByFechaSolicitudDesc(idCliente);
     }

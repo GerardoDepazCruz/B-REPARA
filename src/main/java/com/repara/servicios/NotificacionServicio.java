@@ -1,5 +1,6 @@
 package com.repara.servicios;
 
+import com.repara.dtos.respuesta.NotificacionRespuesta;
 import com.repara.entidades.Notificacion;
 import com.repara.entidades.NotificacionDestinatario;
 import com.repara.entidades.NotificacionDestinatarioId;
@@ -81,5 +82,19 @@ public class NotificacionServicio {
 
     public List<Notificacion> listarTodas() {
         return notificacionRepositorio.findAll();
+    }
+
+        public List<NotificacionRespuesta> listarRespuestasPorUsuario(Long idUsuario) {
+        List<NotificacionDestinatario> lista = destinatarioRepositorio.findByUsuarioIdUsuario(idUsuario);
+        return lista.stream().map(nd -> {
+            NotificacionRespuesta dto = new NotificacionRespuesta();
+            // Usamos el ID de la notificación para el DTO
+            dto.setIdNotificacion(nd.getNotificacion().getIdNotificacion());
+            dto.setAsunto(nd.getNotificacion().getAsunto());
+            dto.setMensaje(nd.getNotificacion().getMensaje());
+            dto.setLeida(nd.getLeida());
+            dto.setFechaEnvio(nd.getNotificacion().getFechaEnvio());
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
     }
 }

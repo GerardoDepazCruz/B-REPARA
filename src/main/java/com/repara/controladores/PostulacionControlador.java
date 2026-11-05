@@ -2,6 +2,7 @@ package com.repara.controladores;
 
 import com.repara.dtos.peticion.PostulacionPeticion;
 import com.repara.dtos.respuesta.ApiRespuesta;
+import com.repara.dtos.respuesta.PostulacionRespuesta;
 import com.repara.entidades.PostulacionTecnico;
 import com.repara.entidades.Usuario;
 import com.repara.servicios.PostulacionServicio;
@@ -47,10 +48,11 @@ public class PostulacionControlador {
             postulacionServicio.listarPorUsuario(usuario.getIdUsuario())));
     }
 
-    @GetMapping("/pendientes")
+        @GetMapping("/pendientes")
     @Operation(summary = "Listar postulaciones pendientes (Admin)")
-    public ResponseEntity<ApiRespuesta<List<PostulacionTecnico>>> listarPendientes() {
-        return ResponseEntity.ok(ApiRespuesta.exitoso(postulacionServicio.listarPendientes()));
+    public ResponseEntity<ApiRespuesta<List<PostulacionRespuesta>>> listarPendientes() {
+        // 🔥 Usamos el método que devuelve el DTO completo
+        return ResponseEntity.ok(ApiRespuesta.exitoso(postulacionServicio.listarPendientesDTO()));
     }
 
     @GetMapping("/todas")

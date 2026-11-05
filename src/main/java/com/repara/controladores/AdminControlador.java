@@ -1,8 +1,10 @@
 package com.repara.controladores;
 
 import com.repara.dtos.respuesta.ApiRespuesta;
+import com.repara.dtos.respuesta.NotificacionRespuesta;
 import com.repara.dtos.respuesta.UsuarioRespuesta;
 import com.repara.entidades.Notificacion;
+import com.repara.entidades.NotificacionDestinatario;
 import com.repara.entidades.Pago;
 import com.repara.entidades.SolicitudServicio;
 import com.repara.entidades.Usuario;
@@ -102,6 +104,22 @@ public class AdminControlador {
             admin.getIdUsuario(), asunto, mensaje, tipo);
         
         return ResponseEntity.ok(ApiRespuesta.exitoso("Notificación enviada", notificacion));
+    }
+
+        @GetMapping("/mis-notificaciones")
+    @Operation(summary = "Obtener mis notificaciones")
+    public ResponseEntity<ApiRespuesta<List<NotificacionRespuesta>>> misNotificaciones(Authentication auth) {
+        Usuario usuario = usuarioServicio.obtenerPorCorreo(auth.getName());
+        List<NotificacionRespuesta> notificaciones = notificacionServicio.listarRespuestasPorUsuario(usuario.getIdUsuario());
+        return ResponseEntity.ok(ApiRespuesta.exitoso(notificaciones));
+    }
+
+    @PostMapping("/notificaciones/{id}/leer")
+    @Operation(summary = "Marcar notificación como leída")
+    public ResponseEntity<ApiRespuesta<Void>> leerNotificacion(@PathVariable Long id, Authentication auth) {
+        Usuario usuario = usuarioServicio.obtenerPorCorreo(auth.getName());
+        notificacionServicio.marcarLeida(id, usuario.getIdUsuario());
+        return ResponseEntity.ok(ApiRespuesta.exitoso("Notificación leída", null));
     }
 
     @GetMapping("/pagos")

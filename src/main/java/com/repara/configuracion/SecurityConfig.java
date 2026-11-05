@@ -50,22 +50,29 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> {})
-            .sessionManagement(session -> 
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas
+                // 1. Rutas públicas (Swagger, Login, Registro y manejo de errores)
                 .requestMatchers(
-                    "/autenticacion/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**",
+                    "/autenticacion/**", 
+                    "/swagger-ui/**", 
+                    "/swagger-ui.html", 
+                    "/v3/api-docs/**", 
+                    "/webjars/**",
                     "/error"
                 ).permitAll()
-                // Rutas de admin
+                
+                // 2. Rutas protegidas explícitamente (Requieren token)
+                .requestMatchers("/solicitudes/**", "/pagos/**", "/chat/**", "/informes/**", "/ia/**").authenticated()
+                
+                // 🔥 3. NOTIFICACIONES: Cualquier usuario logueado (cliente o técnico) puede ver las suyas y marcarlas como leídas
+                .requestMatchers("/admin/mis-notificaciones", "/admin/notificaciones/*/leer").authenticated()
+
+                // 4. Rutas protegidas exclusivamente para el rol ADMIN
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                // Rutas de técnico
                 .requestMatchers("/tecnico/**").hasAnyRole("TECNICO", "ADMIN")
-                // Todo lo demás requiere autenticación
+                
+                // Cualquier otra ruta requiere autenticación
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
