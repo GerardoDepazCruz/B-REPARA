@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 import java.util.List;
 
@@ -22,11 +23,12 @@ public class UsuarioControlador {
     @Autowired
     private UsuarioServicio usuarioServicio;
 
-    @GetMapping("/perfil")
+            @GetMapping("/perfil")
     @Operation(summary = "Obtener perfil del usuario autenticado")
-    public ResponseEntity<ApiRespuesta<UsuarioRespuesta>> obtenerPerfil(Authentication auth) {
+    public ResponseEntity<ApiRespuesta<Usuario>> obtenerPerfil(Authentication auth) {
+        // Esto ya devuelve el objeto Usuario completo, incluyendo telefono y dni
         Usuario usuario = usuarioServicio.obtenerPorCorreo(auth.getName());
-        return ResponseEntity.ok(ApiRespuesta.exitoso(usuarioServicio.convertir(usuario)));
+        return ResponseEntity.ok(ApiRespuesta.exitoso(usuario));
     }
 
     @GetMapping("/{id}")
@@ -46,4 +48,20 @@ public class UsuarioControlador {
     public ResponseEntity<ApiRespuesta<List<UsuarioRespuesta>>> listarClientes() {
         return ResponseEntity.ok(ApiRespuesta.exitoso(usuarioServicio.listarClientes()));
     }
+
+        @PutMapping("/perfil")
+    @Operation(summary = "Actualizar perfil del usuario")
+    public ResponseEntity<ApiRespuesta<Usuario>> actualizarPerfil(
+            Authentication auth, 
+            @RequestBody Map<String, String> body) {
+        
+        Usuario usuario = usuarioServicio.obtenerPorCorreo(auth.getName());
+        
+        // 🔥 Llamamos al servicio en lugar del repositorio
+        Usuario actualizado = usuarioServicio.actualizarPerfil(usuario.getIdUsuario(), body);
+        
+        return ResponseEntity.ok(ApiRespuesta.exitoso("Perfil actualizado", actualizado));
+    }
+
+    
 }

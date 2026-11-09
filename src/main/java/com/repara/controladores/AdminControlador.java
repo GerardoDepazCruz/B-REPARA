@@ -127,4 +127,34 @@ public class AdminControlador {
     public ResponseEntity<ApiRespuesta<List<Pago>>> pagos() {
         return ResponseEntity.ok(ApiRespuesta.exitoso(pagoRepositorio.findAll()));
     }
+
+        @Autowired
+    private com.repara.repositorios.TecnicoRepositorio tecnicoRepositorio;
+
+            @GetMapping("/tecnicos-ranking")
+    @Operation(summary = "Obtener ranking de técnicos")
+    public ResponseEntity<ApiRespuesta<List<com.repara.dtos.respuesta.TecnicoRankingDTO>>> rankingTecnicos() {
+        List<com.repara.entidades.Tecnico> tecnicos = tecnicoRepositorio.findAll();
+        
+        // Ordenamos por calificación
+        tecnicos.sort((t1, t2) -> t2.getCalificacionPromedio().compareTo(t1.getCalificacionPromedio()));
+
+        // Convertimos a DTO para asegurar que los datos del usuario viajen
+        List<com.repara.dtos.respuesta.TecnicoRankingDTO> ranking = tecnicos.stream().map(t -> {
+            com.repara.dtos.respuesta.TecnicoRankingDTO dto = new com.repara.dtos.respuesta.TecnicoRankingDTO();
+            dto.setIdTecnico(t.getIdTecnico());
+            dto.setCalificacionPromedio(t.getCalificacionPromedio());
+            dto.setTotalServicios(t.getTotalServicios());
+            
+            if (t.getUsuario() != null) {
+                dto.setNombres(t.getUsuario().getNombres());
+                dto.setApellidos(t.getUsuario().getApellidos());
+                dto.setCorreo(t.getUsuario().getCorreo());
+                dto.setTelefono(t.getUsuario().getTelefono());
+            }
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
+        
+        return ResponseEntity.ok(ApiRespuesta.exitoso(ranking));
+    }
 }

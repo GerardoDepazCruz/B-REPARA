@@ -1,6 +1,8 @@
 package com.repara.repositorios;
 
 import com.repara.entidades.Tecnico;
+
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface TecnicoRepositorio extends JpaRepository<Tecnico, Long> {
+
+    @EntityGraph(attributePaths = {"usuario"})
+    List<Tecnico> findAll();
     
     Optional<Tecnico> findByUsuarioIdUsuario(Long idUsuario);
     
