@@ -1,5 +1,17 @@
 # RePara-Backend
 
+## **Ejecucion en una nueva computadora**
+
+Para compilar y descargar dependencias
+```
+.\mvnw.cmd clean install -DskipTests
+```
+
+Para levantar el servidor
+```
+.\mvnw.cmd spring-boot:run
+```
+
 ## **Tecnologías**
 
 - **Spring Boot**
